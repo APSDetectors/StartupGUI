@@ -9,7 +9,7 @@
 
 
 import wx
-
+import os
 
 class DPSplashScreen(wx.SplashScreen):
     """
@@ -18,7 +18,8 @@ class DPSplashScreen(wx.SplashScreen):
     def __init__(self, parent=None):
 
         # This is a recipe to a the screen.
-        splashBitmap = wx.Image(name = "/local/DPbin/wxDPStartup/DP-EPICS-Startup-Screen.jpg").ConvertToBitmap()
+        
+        splashBitmap = wx.Image(name = (os.path.dirname(__file__)+"/DP-EPICS-Startup-Screen.jpg")).ConvertToBitmap()
         splashStyle = wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT
         splashDuration = 2000  # milliseconds
 
