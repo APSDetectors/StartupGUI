@@ -20,7 +20,7 @@ import signal
 import subprocess
 import time
 import threading
-import DPOStools_v2 as DPOStools
+import DPOStools
 import sys
 sys.path.append("/local/config/")
 import xrd_config as xrd_config

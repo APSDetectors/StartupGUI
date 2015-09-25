@@ -26,7 +26,7 @@ import threading
 # Get DPOStools
 import sys
 sys.path.append("/local/config")
-import DPOStools_v3 as DPOStools
+import DPOStools
 import xrd_config
 
 # Constants

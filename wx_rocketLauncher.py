@@ -313,7 +313,7 @@ class StartFrame(wx.Frame):
 			self.DPWindows['pixirad'].Center()
 			self.DPWindows['pixirad'].Show()	
 		elif(self.detectorBox.GetValue() == 'Merlin'):
-			import wxMerlin_v1 as wxMerlinStart
+			import wxMerlin as wxMerlinStart
 			try:
 				self.DPWindows['merlin']!=None
 			except:

@@ -19,7 +19,7 @@ import signal
 import subprocess
 import time
 import threading
-import DPOStools as DPOStools
+import DPOStools
 import sys
 
 sys.path.append("/local/config/")

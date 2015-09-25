@@ -1,20 +1,15 @@
-# file : wxPixirad.py
+# file : wxMerlin_v1.py
 
 #!/APSshare/epd/rh6-x86/bin/python2.7
 
-#  wxPixirad.py
+#  wxMerlin_v1.py
 #  
 #  This is a wxPython GUI to launch the
-#  Pixirad CdTe PAD
+#  Quantum Detectors Merlin
 #
 #  Authors: Russell Woods, Matthew Moore
-#     Date: 11/25/2013
-#           12/18/2013
-#		    04/07/2014
-#		    05/14/2014 
-#			06/02/2014 - (copied from wxNeo_v1.py)	
-#			12/09/2014 - Changed how 
-#			04/29/2015 - Added Quick Start Guide
+#     Date: 02/20/2015 Copied from wxPixirad_v2.py
+#           
 
 import wx
 import commands
@@ -32,16 +27,16 @@ import xrd_config
 
 # Constants
 WINDOW_WIDTH = 200
-WINDOW_HEIGHT = 1000
-DETECTOR = 'Pixirad'
-pv_Prefix = xrd_config.DP_PV_SECTOR + 'pixirad'+ xrd_config.DP_PV_SUFFIX
+WINDOW_HEIGHT = 10
+DETECTOR = 'merlin'
+pv_Prefix = xrd_config.DP_PV_SECTOR + 'merlin'+ xrd_config.DP_PV_SUFFIX
 
-class PixiradFrame(wx.Frame):
-	'''Pixirad Window'''
+class MerlinFrame(wx.Frame):
+	'''Merlin Window'''
 	
 	# Define Self Method
-	def __init__(self, position=(400,500), parent=None, ClosePrompt=False):
-		wx.Frame.__init__(self, parent, title = 'Pixirad Startup', pos = position, size = (WINDOW_WIDTH, WINDOW_HEIGHT), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
+	def __init__(self, position=(400,500), parent=None, ClosePrompt=False, SaveRestore=False):
+		wx.Frame.__init__(self, parent, title = 'Merlin Startup', pos = position, size = (WINDOW_WIDTH, WINDOW_HEIGHT), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
 		
 		# Set PS checking wait time (seconds)
 		self.checkCycle=1
@@ -53,57 +48,34 @@ class PixiradFrame(wx.Frame):
 		self.closeprompt=ClosePrompt
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-		# Make a Menu Bar
-		self.menubar = wx.MenuBar()
-		self.helpDocs = wx.Menu()								# Make a Menu
-		self.helpDocs.Append(101, '&Pixirad', '')				# Add entry
-		wx.EVT_MENU(self, 101, self.helpDocs_101_Event)			# Bind to Event
-		self.menubar.Append(self.helpDocs, '&Help Documents')	# Append to Menu Bar
-		self.SetMenuBar(self.menubar)							# Set Menu Bar
-
-
 		#--------------------------------------------------------------------------------------
 		# Neo
 		#--------------------------------------------------------------------------------------
 		self.processes = {	'IOC':{	'pid': -999,
 								'running': False,
-								'search': 'pixiradApp st.cmd',
-								'file': ['/local/DPbin/Scripts/start_ioc', 'pixirad'],
+								'search': '../../bin/linux-x86_64/merlin st.cmd',
+								'file': ['/local/DPbin/Scripts/start_ioc', 'merlin'],
 							},
 							'MEDM':{'pid': -999,
 								'running': False,
-								'search': 'medm -x -macro P='+ pv_Prefix +':, R=cam1: pixirad.adl',
-								'file': '/local/DPbin/Scripts/start_medm_pixirad',
+								'search': 'ADMerlinQuad.adl',
+								'file': '/local/DPbin/Scripts/start_medm_merlinQuad',
 							},
 							'IMAGEJ':{'pid': -999,
 								'running': False,
 								'search': './jre/bin/java -Xmx1024m -jar ij.jar -run EPICS AD Viewer',
 								'file': '/local/DPbin/Scripts/start_imageJ',
 							},
-							'SAVE-RESTORE MENU':
-							{	'pid': -999,
-								'running': False,
-								'search': 'medm -x -macro P='+ pv_Prefix +':,CONFIG=setup, configMenu_small.adl',
-								'file': ['/local/DPbin/Scripts/start_medm_configMenu',pv_Prefix,]
-							},
-							'caQtDM':
-					    {	'pid': -999,
-								'running': False,
-								'search': 'caQtDM -macro P='+ pv_Prefix + ':, R=cam1: pixirad.ui',
-								'file': ['/local/DPbin/Scripts/start_caQtDM_pixirad',pv_Prefix,]
-							},
 		}
 		
 		# Title:									
-		self.title = wx.StaticText(self.background, label="Pixirad 250k")
+		self.title = wx.StaticText(self.background, label="Merlin Quad")
 		self.title.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.BOLD))
 		
 		# Start and Stop Buttons:
 		self.ButtonOrder = ['IOC',
 							'MEDM',
 							'IMAGEJ',
-							'SAVE-RESTORE MENU',
-							'caQtDM',
 							]
 	
 		self.Buttons = dict.fromkeys(self.ButtonOrder)
@@ -124,11 +96,14 @@ class PixiradFrame(wx.Frame):
 		self.Buttons['MEDM']['Stop Button'].Bind(wx.EVT_BUTTON, lambda event: self.stop_Event(event, 'MEDM'))	
 		self.Buttons['IMAGEJ']['Start Button'].Bind(wx.EVT_BUTTON, lambda event: self.start_Event(event, 'IMAGEJ'))
 		self.Buttons['IMAGEJ']['Stop Button'].Bind(wx.EVT_BUTTON, lambda event: self.stop_Event(event, 'IMAGEJ'))
-		self.Buttons['SAVE-RESTORE MENU']['Start Button'].Bind(wx.EVT_BUTTON, lambda event: self.start_Event(event, 'SAVE-RESTORE MENU'))
-		self.Buttons['SAVE-RESTORE MENU']['Stop Button'].Bind(wx.EVT_BUTTON, lambda event: self.stop_Event(event, 'SAVE-RESTORE MENU'))
-		self.Buttons['caQtDM']['Start Button'].Bind(wx.EVT_BUTTON, lambda event: self.start_Event(event, 'caQtDM'))
-		self.Buttons['caQtDM']['Stop Button'].Bind(wx.EVT_BUTTON, lambda event: self.stop_Event(event, 'caQtDM'))			
 	
+	
+		# SaveRestore Buttons
+		if SaveRestore:
+			self.restore_title = wx.StaticText(self.background, label="Save/Restore Manager\t")
+			self.restore_title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+			self.restore_Btn = wx.Button(self.background, label = 'Open', size=[60,25])
+			self.restore_Btn.Bind(wx.EVT_BUTTON, self.restore_Event)
 											
 		# Make Horizontal Box Sizers
 		self.horizontalBoxes = []							
@@ -136,7 +111,11 @@ class PixiradFrame(wx.Frame):
 			self.horizontalBoxes.append(wx.BoxSizer(wx.HORIZONTAL))
 			self.horizontalBoxes[-1].Add(self.Buttons[Rows]['Title'], proportion = 1, border = 0,flag=wx.ALIGN_CENTER)
 			self.horizontalBoxes[-1].Add(self.Buttons[Rows]['Start Button'], proportion = 0, border = 0,flag=wx.ALIGN_CENTER)
-			self.horizontalBoxes[-1].Add(self.Buttons[Rows]['Stop Button'], proportion = 0, border = 0,flag=wx.ALIGN_CENTER)					
+			self.horizontalBoxes[-1].Add(self.Buttons[Rows]['Stop Button'], proportion = 0, border = 0,flag=wx.ALIGN_CENTER)
+		if SaveRestore:
+			self.horizontalBoxes.append(wx.BoxSizer(wx.HORIZONTAL))
+			self.horizontalBoxes[-1].Add(self.restore_title, proportion = 1, border = 0,flag=wx.ALIGN_CENTER)
+			self.horizontalBoxes[-1].Add(self.restore_Btn, proportion = 0, border = 0,flag=wx.ALIGN_CENTER)					
 							
 		# Make a vertical sizer
 		self.verticalBox = wx.BoxSizer(wx.VERTICAL)
@@ -162,10 +141,7 @@ class PixiradFrame(wx.Frame):
 	#--------------------------------------------------------------------------------------
 	# Define Event Methods (button actions)
 	#--------------------------------------------------------------------------------------
-	def helpDocs_101_Event(self, event):
-		tempCommand = ['firefox', 'https://www1.aps.anl.gov/Divisions/XSD-Groups/Detectors/Area-Detectors#pixirad']
-		p_ioc = subprocess.Popen(tempCommand, shell=False, preexec_fn=os.setsid)
-		
+
 	def start_Event(self, event, app):
 		'''Start an App'''
 		if not(self.processes[app]['running']):
@@ -231,6 +207,15 @@ class PixiradFrame(wx.Frame):
 			#print 'setting button colour and label'
 			wx.CallAfter(self.Buttons[app]['Start Button'].SetBackgroundColour, wx.WHITE)
 			wx.CallAfter(self.Buttons[app]['Start Button'].SetLabel, "Start")
+
+
+	def restore_Event(self, event):
+		'''Launch Save/Restore Window'''
+		print 'Opening save/restore window...'
+		self.child = wxSaveRestore.saveRestoreFrame(parent=self)
+		self.child.Center()
+		self.child.Show()
+		self.child.detectorBox.SetValue(DETECTOR)
 
 
 	def OnClose(self, event):

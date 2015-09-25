@@ -23,7 +23,7 @@ import threading
 
 # Get DPOStools
 import sys
-import DPOStools_v2 as DPOStools
+import DPOStools
 
 sys.path.append("/local/config/")
 import xrd_config as xrd_config
