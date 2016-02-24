@@ -11,6 +11,9 @@ The Startup GUI is built with wxpython (any other dependences?)
 
 Need to add more information on how to use and general structure of the software.
 
-more ..
+Some issues:
+ * Hardwired to use /APSshare/epd/rh6-x86/bin/python2.7
+ * Need to figure out how to import DPOStools and xrd_config which is on /local/config
+ 
 
 
