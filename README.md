@@ -11,5 +11,6 @@ The Startup GUI is built with wxpython (any other dependences?)
 
 Need to add more information on how to use and general structure of the software.
 
+more ..
 
 
