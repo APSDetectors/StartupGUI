@@ -86,7 +86,7 @@ def findSector():
 		return 's6'
 	elif subnet in [107]:
 		return 's7'
-	elif subnet in [108|116]:
+	elif subnet in [108,116]:
 		return 's8'
 	elif subnet in [112]:
 		return 's9'
