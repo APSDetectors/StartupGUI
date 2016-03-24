@@ -8,25 +8,25 @@
 #  master launch window for all supported detectors.
 #
 #  Authors: Russell Woods, Matthew Moore
-#		Date: 5/20/2013
-#		8/16/2013
-#		11/25/2013
-#		04/23/2014 ----> Fixing crashing for lack of wxCallAfter and added Mythen
-#		05/05/2014 ----> Updates to Mar345, Prosilica and Mar165
-#		06/02/2014 ----> Add Andor Neo and Pixirad
-#		09/11/2014 ----> updating Mythen
-#		12/09/2014 ----> updates for changes in how we start MEDMs/ImageJ
-#		12/18/2014 ----> Fixing so that you can't open more than one copy of a window 
-#		01/20/2015 ----> Update to Pilatus
-#		02/20/2015 ----> Added Merlin
-#		03/25/2015 ----> Updated Prosilica, Pixirad, Neo, Mar345, Mar165
-#		04/28/2015 ----> add REFRESH CONFIG files to the enu bar, fix verison control and naming standards
-#   07/15/2015 ----> Updated Mythen
-#   08/20/2015 ----> Added Xspress3
+#		Date: 05/20/2013
+#		      08/16/2013
+#		      11/25/2013
+#		      04/23/2014 ----> Fixing crashing for lack of wxCallAfter and added Mythen
+#		      05/05/2014 ----> Updates to Mar345, Prosilica and Mar165
+#		      06/02/2014 ----> Add Andor Neo and Pixirad
+#		      09/11/2014 ----> updating Mythen
+#		      12/09/2014 ----> updates for changes in how we start MEDMs/ImageJ
+#		      12/18/2014 ----> Fixing so that you can't open more than one copy of a window 
+#		      01/20/2015 ----> Update to Pilatus
+#		      02/20/2015 ----> Added Merlin
+#		      03/25/2015 ----> Updated Prosilica, Pixirad, Neo, Mar345, Mar165
+#		      04/28/2015 ----> add REFRESH CONFIG files to the enu bar, fix verison control and naming standards
+#         07/15/2015 ----> Updated Mythen
+#         08/20/2015 ----> Added Xspress3
+#         03/24/2016 ----> Added Ikon
 
 import wx
 import commands
-
 import os
 import signal
 import subprocess
@@ -35,7 +35,6 @@ from threading import Thread
 
 import sys
 
-
 #import DetectorList
 import wx_splashScreen
 import time
@@ -43,7 +42,6 @@ import time
 # Import xraydetector dependent info
 sys.path.append("/local/config/")
 import xrd_config
-
 
 # Constants
 WINDOW_WIDTH = 5000
@@ -54,16 +52,13 @@ class StartFrame(wx.Frame):
 	'''The Master Window'''
 
 	# Globals:
-	
 	DETECTOR_CHOICE = "Detector"
 
 	def __init__(self):
 		wx.Frame.__init__(self, wx.GetApp().TopWindow, title = 'DP EPICS Launcher - Master', pos=(100, 200), size=(WINDOW_WIDTH, WINDOW_HEIGHT))
 
-		
 		# Make the panel
 		self.background = wx.Panel(self)
-		
 		self.DPWindows=dict()
 
 		# Make a Menu Bar
@@ -94,7 +89,6 @@ class StartFrame(wx.Frame):
 		self.helpDocs.AppendMenu(104, '&Linkam', self.submenu_Linkam)
 		self.menubar.Append(self.helpDocs, '&Help Documents')
 		
-		
 		# DP Info Menu
 		self.DPInfoMenu = wx.Menu()
 		self.DPInfoMenu.Append(201, '&Pager', '')
@@ -106,7 +100,6 @@ class StartFrame(wx.Frame):
 		wx.EVT_MENU(self, 203, self.DetectorGroup_Event)
 		wx.EVT_MENU(self, 204, self.Requests_Event)
 		self.menubar.Append(self.DPInfoMenu, '&Detector Pool')
-		
 		
 		# Refresh Save Files Menu
 		self.SaveMenu = wx.Menu()
@@ -224,11 +217,8 @@ class StartFrame(wx.Frame):
 			self.DPWindows['vortex'].Center()
 			self.DPWindows['vortex'].Show()
 			self.DPWindows['vortex'].SetFocus()
-			
-			
 
 		elif(self.detectorBox.GetValue() == 'Prosilica'):
-			
 			import wxProsilica									# wx.CallAfter fixed
 			try:
 				self.DPWindows['prosilica'] !=None
@@ -328,6 +318,15 @@ class StartFrame(wx.Frame):
 				self.DPWindows['xspress3'] = wxXspress3Start.Xspress3Frame(parent=self)
 			self.DPWindows['xspress3'].Center()
 			self.DPWindows['xspress3'].Show()
+			
+		elif(self.detectorBox.GetValue() == 'Ikon'):
+			import wxIkon
+			try:
+				self.DPWindows['ikon']!=None
+			except:
+				self.DPWindows['ikon'] = wxIkon.IkonFrame(parent=self)
+			self.DPWindows['ikon'].Center()
+			self.DPWindows['ikon'].Show()			
 		
 		else: print "Detector not supported yet..."
 

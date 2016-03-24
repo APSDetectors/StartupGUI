@@ -1,4 +1,4 @@
-# file : wxNeo.py
+# file : wxIkon.py
 
 #!/APSshare/epd/rh6-x86/bin/python2.7
 
@@ -10,11 +10,11 @@
 #  Authors: Russell Woods, Matthew Moore
 #     Date: 11/25/2013
 #           12/18/2013
-#	    04/07/2014
-#	    05/14/2014 
-#	    06/02/2014 (copied from wxPilatus_v2.py)	
-#	    04/29/2015 (Added Quick Start Guide)
-#	    11/11/2015 (Copied from wxNeo.py)
+#	          04/07/2014
+#	          05/14/2014 
+#	          06/02/2014 (copied from wxPilatus_v2.py)	
+#	          04/29/2015 (Added Quick Start Guide)
+#	          11/11/2015 (Copied from wxNeo.py)
 
 import wx
 import commands
@@ -36,7 +36,7 @@ WINDOW_HEIGHT = 1000
 DETECTOR = 'Ikon'
 pv_Prefix = xrd_config.DP_PV_SECTOR + 'ikon'+ xrd_config.DP_PV_SUFFIX
 
-class NeoFrame(wx.Frame):
+class IkonFrame(wx.Frame):
 	'''iKon Window'''
 	
 	# Define Self Method
@@ -53,19 +53,19 @@ class NeoFrame(wx.Frame):
 
 		# Make a Menu Bar
 		self.menubar = wx.MenuBar()
-		self.helpDocs = wx.Menu()					# Make a Menu
-		self.helpDocs.Append(101, '&Ikon', '')				# Add entry
-		wx.EVT_MENU(self, 101, self.helpDocs_101_Event)			# Bind to Event
+		self.helpDocs = wx.Menu()					                      # Make a Menu
+		self.helpDocs.Append(101, '&Ikon', '')				          # Add entry
+		wx.EVT_MENU(self, 101, self.helpDocs_101_Event)			    # Bind to Event
 		self.menubar.Append(self.helpDocs, '&Help Documents')		# Append to Menu Bar
-		self.SetMenuBar(self.menubar)					# Set Menu Bar
+		self.SetMenuBar(self.menubar)					                  # Set Menu Bar
 
 		#--------------------------------------------------------------------------------------
 		# Ikon
 		#--------------------------------------------------------------------------------------
 		self.processes = {	'IOC':{	'pid': -999,
 						'running': False,
-						'search': '/bin/linux-x86_64/andor3App st.cmd.linux',
-						'file': ['/local/DPbin/Scripts/start_ioc', 'andor'],
+						'search': 'st.cmd_ikon',
+						'file': ['/local/DPbin/Scripts/start_ioc', 'ikon'],
 					},
 					'MEDM':{'pid': -999,
 						'running': False,
@@ -269,7 +269,7 @@ class NeoFrame(wx.Frame):
 app_2 = wx.App(redirect=False)
 
 # Make an instance of the class - the Topmost GUI element
-russTest = NeoFrame()
+russTest = IkonFrame()
 
 # Let it run!
 app_2.MainLoop()
