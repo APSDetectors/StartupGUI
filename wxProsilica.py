@@ -5,17 +5,17 @@
 #  This is a wxPython GUI designed to launch EPICS IOC and MEDM
 #  scripts on the new RHEL LDAP Detector Pool machines.  
 #
-#  Authors: Russell Woods, Matthew Moore
+#  Authors: Russell Woods, Matthew Moore, Chris Piatak
 #     Date: 05/20/2013
 #           08/08/2013
 #           03/12/2014
 #           03/27/2014
 #           07/17/2014
 #           09/09/2014
-#			12/09/2014 - Updated pv_Prefix construction
-#			03/25/2015 - Added save restore menu & updated to newer way of button updateds
-#			04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
-
+#           12/09/2014 - Updated pv_Prefix construction
+#           03/25/2015 - Added save restore menu & updated to newer way of button updateds
+#           04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
+#           04/25/2016 - Added 1BM-manta
 
 import epics
 import wx
@@ -25,7 +25,7 @@ import signal
 import subprocess
 import time
 import threading
-import DPOStools
+import DPOStools_v3 as DPOStools
 import xrd_config
 
 
@@ -74,7 +74,7 @@ class ProsilicaFrame(wx.Frame):
 		# Model Name
 		self.ModelBox_title = wx.StaticText(self.background, -1, 'DP Prosilica \t\nModel Number:\t')
 		self.ModelBox_title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-		self.ModelBox = wx.ComboBox(self.background, choices=["GC1380H", "GC2450", "XrayEye"], size=[90,25])
+		self.ModelBox = wx.ComboBox(self.background, choices=["GC1380H", "GC2450", "XrayEye", "1BM_manta" ], size=[90,25])
 		self.ModelBox.SetEditable(False)
 		
 		# Bit Depth
