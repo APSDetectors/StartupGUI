@@ -25,7 +25,7 @@ import signal
 import subprocess
 import time
 import threading
-import DPOStools_v3 as DPOStools
+import DPOStools
 import xrd_config
 
 
