@@ -7,10 +7,12 @@
 #
 #  Authors: Russell Woods, Matthew Moore
 #     Date: 05/20/2013
-#			08/21/2013
-#			05/05/2014 - Move to standardized setup and fixed bug related to wx.callafter
-#			09/04/2014
-#			04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
+#		08/21/2013
+#		05/05/2014 - Move to standardized setup and fixed bug related to wx.callafter
+#		09/04/2014
+#		04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
+#		10/13/2017 - Added field for entering the detector serial number, used to load correct calibration file
+#	        06/04/2019 - updated stop_Event and pscheck to work with caQtDM from APSshare
 
 import wx
 import commands
@@ -46,7 +48,7 @@ class Mar165Frame(wx.Frame):
 		wx.Frame.__init__(self, parent, title = 'DP Mar 165 Startup', pos = position, size = (WINDOW_WIDTH, WINDOW_HEIGHT), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
 		
 		# Set PS checking wait time (seconds)
-		self.checkCycle=.01
+		self.checkCycle=1
 
 		# Make the panel
 		self.background = wx.Panel(self, -1, style=wx.SUNKEN_BORDER)
@@ -67,6 +69,12 @@ class Mar165Frame(wx.Frame):
 		self.title = wx.StaticText(self.background, label="Mar165")
 		self.title.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.BOLD))
 		
+		# serial number entry
+		MARCCD_LIST = ['DetPool A :0062', 'DetPool B :0069', 'DetPool C :0022', 'Sector 12 :0040', 'HPCAT :0087',]
+		self.serialBox_title = wx.StaticText(self.background, -1, 'Detector Serial Number:')
+		self.serialBox_title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+		#self.serialBox = wx.TextCtrl(self.background, size=[60,25])
+		self.serialBox = wx.ComboBox(self.background, -1, "choose detector ID", size=(250,25), choices=MARCCD_LIST, style=wx.CB_READONLY)
 
 		# Launch and Stop Buttons:
 		# This Dictionary holds required information for each Process controlled by the GUI
@@ -107,13 +115,13 @@ class Mar165Frame(wx.Frame):
 
 		# Start and Stop Buttons:
 		self.ButtonOrder = [
-							'MARCCD',
-							'IOC',
-							'MEDM',
-							'IMAGEJ',
-							'SAVE-RESTORE MENU',
-							'caQtDM',
-							]
+					'MARCCD',
+					'IOC',
+					'MEDM',
+					'IMAGEJ',
+					'SAVE-RESTORE MENU',
+					'caQtDM',
+					]
 			
 		self.Buttons = dict.fromkeys(self.ButtonOrder)
 
@@ -124,8 +132,6 @@ class Mar165Frame(wx.Frame):
 			self.Buttons[Row]["Title"].SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
 			self.Buttons[Row]["Start Button"] = wx.Button(self.background, label='Start', size=[60,25])
 			self.Buttons[Row]["Stop Button"] = wx.Button(self.background, label='Stop', size=[60,25])
-			#self.Buttons[Row]['Start Button'].Bind(wx.EVT_BUTTON, lambda event: self.start_Event(event, Row))  # <--------- Doesn't work for unknown reason.
-			#self.Buttons[Row]['Stop Button'].Bind(wx.EVT_BUTTON, lambda event: self.stop_Event(event, Row))
 	
 		self.Buttons['IOC']['Start Button'].Bind(wx.EVT_BUTTON, lambda event: self.start_Event(event, 'IOC'))
 		self.Buttons['IOC']['Stop Button'].Bind(wx.EVT_BUTTON, lambda event: self.stop_Event(event, 'IOC'))
@@ -142,7 +148,12 @@ class Mar165Frame(wx.Frame):
 	
 											
 		# Make Horizontal Box Sizers
-		self.horizontalBoxes = []							
+		self.horizontalBoxes = []
+		self.horizontalBoxes.append(wx.BoxSizer(wx.HORIZONTAL))
+		self.horizontalBoxes[-1].Add(self.serialBox_title, proportion = 1, border = 0,flag=wx.ALIGN_CENTER)
+		self.horizontalBoxes[-1].Add(self.serialBox, proportion = 0, border = 0,flag=wx.ALIGN_CENTER)
+		
+						
 		for Rows in self.ButtonOrder:
 			self.horizontalBoxes.append(wx.BoxSizer(wx.HORIZONTAL))
 			self.horizontalBoxes[-1].Add(self.Buttons[Rows]['Title'], proportion = 1, border = 0,flag=wx.ALIGN_CENTER)
@@ -184,7 +195,16 @@ class Mar165Frame(wx.Frame):
 			# Start the subprocess
 			tempCommand = self.processes[app]['file']
 			
-			if app=='MEDM' or app=='IMAGEJ':
+			if app=='MARCCD':
+				serialNum = self.serialBox.GetValue().split(':')[1]
+				print 'Detector Choice = ' + serialNum + '\n'
+				if len(serialNum)==4:
+					tempCommand = [self.processes['MARCCD']['file'], str(serialNum)]
+					subprocess.Popen(tempCommand, preexec_fn=os.setsid)
+				else:
+					print "Please Choose CCD from dropdown menu"
+
+			elif app=='MEDM' or app=='IMAGEJ':
 				subprocess.Popen([tempCommand, pv_Prefix], preexec_fn=os.setsid)
 			else:
 				subprocess.Popen(tempCommand, preexec_fn=os.setsid)
@@ -204,7 +224,16 @@ class Mar165Frame(wx.Frame):
 		'''Stop an App'''
 		if(self.processes[app]['running']):
 			print 'Stopping '+str(app)+'...'
-			os.kill(self.processes[app]['pid'], signal.SIGKILL)
+
+			# pgrep for all associated PIDs and make into a list
+			pids = (subprocess.check_output([ 'pgrep', '-f', self.processes[app]['search'] ])).split('\n')
+			pids = filter(None, pids)
+
+			# Loop over all PIDs
+			for i in pids:
+				print ' stopping pid: ' + str(i)
+				os.kill(int(i), signal.SIGKILL)
+
 			self.button_status(app, 'off')
 		else:
 			print "No process to stop."
@@ -214,10 +243,9 @@ class Mar165Frame(wx.Frame):
 		'''Track the current state of processes - Runs in a separate thread'''
 		while(self.progRunning):
 			for item in self.processes:
-				#print 'pscheck is running: ' + str(item)
 				try:
-					tempResult = subprocess.check_output([ 'pgrep', '-f', self.processes[item]['search'] ])
-					self.processes[item]['pid'] = int(tempResult.split('\n')[0])
+					tempResult = (subprocess.check_output([ 'pgrep', '-f', self.processes[item]['search'] ])).split('\n')[0]
+					self.processes[item]['pid'] = int(tempResult)
 					if not(self.processes[item]['running']):
 						self.button_status(item, 'on')
 						self.processes[item]['running'] = True

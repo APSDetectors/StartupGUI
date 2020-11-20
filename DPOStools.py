@@ -3,16 +3,15 @@
 # Update 2015-01-20 	Adding function to find what beamline we are at
 # Update 2015-03-23		Adding function to return number of copies of process running on machine
 # Update 2015-09-25   Removed save restore stuff
+# Update 2017-01-11		REALLY removed save restore stuff!
 
 
 import subprocess
 import time
-#import epics.autosave
 import os
-#import pyparsing
-#import save_restore
 from socket import gethostname, gethostbyname
 
+#-------------------------------------------------------------------
 def waitforprocess(processCMD):
 	'''Waits for Process to start, returns I.D.'''
 	while True:
@@ -21,50 +20,25 @@ def waitforprocess(processCMD):
 			psresults=subprocess.check_output(["pgrep", "-f", processCMD])
 			break
 		except:
+                        print 'waiting for process to start...'
 			time.sleep(1)
 	#print 'DPOStools_v2 psresults = ' + str(psresults) 		
 	return int(psresults.split('\n')[0])
 
-'''
-def savePVs(filePath, reqChoice, fileChoice):
-	#Use pyEpics to save PVs for a given sector/detector
+#-------------------------------------------------------------------
+def processCount(processCMD):
+	'''Waits for Process to start, returns I.D.'''
+	while True:
+		#find the PID, the hard way
+		try:
+			psresults=subprocess.check_output(["pgrep", "-f", processCMD])
+			break
+		except:
+			time.sleep(0.1)
+	#print 'DPOStools_v2 psresults = ' + str(psresults) 		
+	return len(psresults.split('\n'))
 	
-	saveRestoreString = str(filePath) + str(fileChoice)
-	reqString = str(filePath) + str(reqChoice)
-	
-	if(reqChoice and fileChoice):
-		print '...saving PVs to: ' + str(filePath)
-		#epics.autosave.save_pvs(reqString, saveRestoreString, True)
-		save_restore.save_pvs(reqString, saveRestoreString, True)
-	else:
-		print 'Please choose both .req and .sav files!'
-
-
-def restorePVs(filePath, fileChoice):
-	#Use pyEpics to restore PVs for a given sector/detector	
-
-	saveRestoreString = str(filePath) + str(fileChoice)	
-	print '...restoring PVs from: ' + str(filePath) + str(fileChoice)
-	#epics.autosave.restore_pvs(saveRestoreString, debug=True)
-	save_restore.restore_pvs(saveRestoreString, debug=True)
-
-'''
-def folderSearch(path, fileExtention):
-	'''Seach a folder, return the contents in a list'''
-	print '...searching folder: ' + str(path)
-	
-	tempList = os.listdir(path)
-	finalList = []
-	for item in tempList:
-		if item.endswith(fileExtention):
-			print '...adding file: ' + str(item)
-			finalList.append(item)
-	
-	print '...Folder Contents = ' + str(tempList)	
-	print '...File List: ' + str(finalList)
-	return finalList
-	
-	
+#-------------------------------------------------------------------	
 def findSector():
 	host = gethostname()
 	ip = gethostbyname(host)
@@ -80,13 +54,13 @@ def findSector():
 		return 's3'
 	elif subnet in [115]:
 		return 's4'
-	elif subnet in [148,149]:
+	elif subnet in [148, 149]:
 		return 's5'
 	elif subnet in [106]:
 		return 's6'
 	elif subnet in [107]:
 		return 's7'
-	elif subnet in [108,116]:
+	elif subnet in [108, 116]:
 		return 's8'
 	elif subnet in [112]:
 		return 's9'
@@ -108,7 +82,7 @@ def findSector():
 		return 's17'
 	elif subnet in [204]:
 		return 's18'
-	elif subnet in [192,193]:
+	elif subnet in [192, 193]:
 		return 's19'
 	elif subnet in [119]:
 		return 's20'
@@ -136,22 +110,12 @@ def findSector():
 		return 's31'	
 	elif subnet in [102]:
 		return 's32'
-	elif subnet in [124 ,125]:
+	elif subnet in [124, 125]:
 		return 's33-34'
 	elif subnet in [235]:
 		return 's35'
 	else:
 		return 'unknown'
-	
-def processCount(processCMD):
-	'''Waits for Process to start, returns I.D.'''
-	while True:
-		#find the PID, the hard way
-		try:
-			psresults=subprocess.check_output(["pgrep", "-f", processCMD])
-			break
-		except:
-			time.sleep(0.1)
-	#print 'DPOStools_v2 psresults = ' + str(psresults) 		
-	return len(psresults.split('\n'))
+#-------------------------------------------------------------------	
+
 	

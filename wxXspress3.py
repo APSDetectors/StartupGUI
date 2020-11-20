@@ -9,9 +9,7 @@
 #
 #  Authors: Russell Woods, Matthew Moore
 #     Date: 08/20/2015 Copied from wxPixirad
-#
-#
-#
+#	    06/04/2019 - updated stop_Event and pscheck to work with caQtDM from APSshare
 
 import wx
 import commands
@@ -100,8 +98,6 @@ class Xspress3Frame(wx.Frame):
 			self.Buttons[Row]["Title"].SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
 			self.Buttons[Row]["Start Button"] = wx.Button(self.background, label='Start', size=[60,25])
 			self.Buttons[Row]["Stop Button"] = wx.Button(self.background, label='Stop', size=[60,25])
-			#self.Buttons[Row]['Start Button'].Bind(wx.EVT_BUTTON, lambda event: self.start_Event(event, Row))  # <--------- Doesn't work for unknown reason.
-			#self.Buttons[Row]['Stop Button'].Bind(wx.EVT_BUTTON, lambda event: self.stop_Event(event, Row))
 	
 		self.Buttons['IOC']['Start Button'].Bind(wx.EVT_BUTTON, lambda event: self.start_Event(event, 'IOC'))
 		self.Buttons['IOC']['Stop Button'].Bind(wx.EVT_BUTTON, lambda event: self.stop_Event(event, 'IOC'))
@@ -174,7 +170,16 @@ class Xspress3Frame(wx.Frame):
 		'''Stop an App'''
 		if(self.processes[app]['running']):
 			print 'Stopping '+str(app)+'...'
-			os.kill(self.processes[app]['pid'], signal.SIGKILL)
+
+			# pgrep for all associated PIDs and make into a list
+			pids = (subprocess.check_output([ 'pgrep', '-f', self.processes[app]['search'] ])).split('\n')
+			pids = filter(None, pids)
+
+			# Loop over all PIDs
+			for i in pids:
+				print ' stopping pid: ' + str(i)
+				os.kill(int(i), signal.SIGKILL)
+
 			self.button_status(app, 'off')
 		else:
 			print "No process to stop."
@@ -184,7 +189,6 @@ class Xspress3Frame(wx.Frame):
 		'''Track the current state of processes - Runs in a separate thread'''
 		while(self.progRunning):
 			for item in self.processes:
-				#print 'pscheck is running: ' + str(item)
 				try:
 					tempResult = subprocess.check_output([ 'pgrep', '-f', self.processes[item]['search'] ])
 					self.processes[item]['pid'] = int(tempResult.split('\n')[0])

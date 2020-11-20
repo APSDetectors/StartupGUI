@@ -1,5 +1,7 @@
-#!/APSshare/epd/rh6-x86/bin/python2.7
+#!/local/anaconda2/bin/python2.7
+#######!/APSshare/anaconda/x86_64/bin/python
 
+#######!/APSshare/epd/rh6-x86/bin/python2.7
 #######!/APSshare/anaconda/x86_64/bin/python2.7
 #
 #  wx_rocketLauncher
@@ -7,7 +9,7 @@
 #  This is a wxPython GUI is designed to be the 
 #  master launch window for all supported detectors.
 #
-#  Authors: Russell Woods, Matthew Moore
+#  Authors: Russell Woods, Matthew Moore, Christopher Piatak
 #		Date: 05/20/2013
 #		      08/16/2013
 #		      11/25/2013
@@ -44,8 +46,8 @@ sys.path.append("/local/config/")
 import xrd_config
 
 # Constants
-WINDOW_WIDTH = 5000
-WINDOW_HEIGHT = 300
+WINDOW_WIDTH = 340
+WINDOW_HEIGHT = 131
 
 
 class StartFrame(wx.Frame):
@@ -71,22 +73,26 @@ class StartFrame(wx.Frame):
 		self.helpDocs.Append(103, '&Mar345',    '')
 		self.helpDocs.Append(104, '&Mar165',    '')
 		self.helpDocs.Append(105, '&Pilatus',    '')
+                self.helpDocs.Append(106, '&Cryostream',    '')
+                self.helpDocs.Append(107, '&Pixirad-1',    '')
 		wx.EVT_MENU(self, 101, self.helpDocs_101_Event)
 		wx.EVT_MENU(self, 102, self.helpDocs_102_Event)
 		wx.EVT_MENU(self, 103, self.helpDocs_103_Event)
 		wx.EVT_MENU(self, 104, self.helpDocs_104_Event)
 		wx.EVT_MENU(self, 105, self.helpDocs_105_Event)
+                wx.EVT_MENU(self, 106, self.helpDocs_106_Event)
+                wx.EVT_MENU(self, 107, self.helpDocs_107_Event)
 
 		# Make a SubMenu
-		self.submenu_Linkam = wx.Menu()
-		self.submenu_Linkam = wx.Menu()
-		self.submenu_Linkam.Append(301, '&TS1500',  '')
-		self.submenu_Linkam.Append(302, '&THMS600', '')
-		self.submenu_Linkam.Append(303, '&DSC600',  '')
-		wx.EVT_MENU(self, 301, self.helpDocs_301_Event)
-		wx.EVT_MENU(self, 302, self.helpDocs_302_Event)
-		wx.EVT_MENU(self, 303, self.helpDocs_303_Event)
-		self.helpDocs.AppendMenu(104, '&Linkam', self.submenu_Linkam)
+		#self.submenu_Linkam = wx.Menu()
+		#self.submenu_Linkam = wx.Menu()
+		#self.submenu_Linkam.Append(301, '&TS1500',  '')
+		#self.submenu_Linkam.Append(302, '&THMS600', '')
+		#self.submenu_Linkam.Append(303, '&DSC600',  '')
+		#wx.EVT_MENU(self, 301, self.helpDocs_301_Event)
+		#wx.EVT_MENU(self, 302, self.helpDocs_302_Event)
+		#wx.EVT_MENU(self, 303, self.helpDocs_303_Event)
+		#self.helpDocs.AppendMenu(104, '&Linkam', self.submenu_Linkam)
 		self.menubar.Append(self.helpDocs, '&Help Documents')
 		
 		# DP Info Menu
@@ -95,10 +101,12 @@ class StartFrame(wx.Frame):
 		self.DPInfoMenu.Append(204, '&Equipment Requests', '')
 		self.DPInfoMenu.Append(202, '&General', '')
 		self.DPInfoMenu.Append(203, '&Detector Group', '')
+                self.DPInfoMenu.Append(205, '&Version List', '')
 		wx.EVT_MENU(self, 201, self.Pager_Event)
 		wx.EVT_MENU(self, 202, self.DPGeneral_Event)
 		wx.EVT_MENU(self, 203, self.DetectorGroup_Event)
 		wx.EVT_MENU(self, 204, self.Requests_Event)
+                wx.EVT_MENU(self, 205, self.VersionList_Event)
 		self.menubar.Append(self.DPInfoMenu, '&Detector Pool')
 		
 		# Refresh Save Files Menu
@@ -135,12 +143,11 @@ class StartFrame(wx.Frame):
 		self.verticalBox_1.Add(self.horizontalBox_1, proportion=1)
 		self.background.SetSizer(self.verticalBox_1)
 		self.background.Fit()
-		self.Fit()
+		#self.Fit()
 		self.Center()
 		
 		self.Show()
 	
-
 	
 	# These Methods handle HelpDoc Menu items
 	def Connect_Event(self, event):
@@ -153,24 +160,37 @@ class StartFrame(wx.Frame):
 		pgrDLG.Destroy()
 	
 	def helpDocs_101_Event(self, event):
-		tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Detector_Information/Prosilica/index.html']
+		tempCommand = ['firefox', 'https://www.aps.anl.gov/Detectors/Scintillator-and-Visible-Light-Detectors#Prosilica']
 		p_ioc = subprocess.Popen(tempCommand, shell=False, preexec_fn=os.setsid)
 
 	def helpDocs_102_Event(self, event):
-		tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Detector_Information/Vortex_SDD_SII_Nano']
+                tempCommand = ['firefox', 'https://www.aps.anl.gov/Detectors/Spectroscopic-Detectors#Vortex']
+		#tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Detector_Information/Vortex_SDD_SII_Nano']
 		p_ioc = subprocess.Popen(tempCommand, shell=False, preexec_fn=os.setsid)
 
 	def helpDocs_103_Event(self, event):
-		tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Detector_Information/Mar_345_Image_Plate/index.html']
+                tempCommand = ['firefox', 'https://www.aps.anl.gov/Detectors/Area-Detectors#Mar345']
+		#tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Detector_Information/Mar_345_Image_Plate/index.html']
 		p_ioc = subprocess.Popen(tempCommand, shell=False, preexec_fn=os.setsid)
 
 	def helpDocs_104_Event(self, event):
-		tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Detector_Information/Mar_165_CCD_Camera/index.html']
+                tempCommand = ['firefox', 'https://www.aps.anl.gov/Detectors/Area-Detectors#Mar165CCD']
+		#tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Detector_Information/Mar_165_CCD_Camera/index.html']
 		p_ioc = subprocess.Popen(tempCommand, shell=False, preexec_fn=os.setsid)
 
 	def helpDocs_105_Event(self, event):
-		tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Detector_Information/PilatusII_100K/']
+                tempCommand = ['firefox', 'https://www.aps.anl.gov/Detectors/Area-Detectors#Pilatus']
+		#tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Detector_Information/PilatusII_100K/']
 		p_ioc = subprocess.Popen(tempCommand, shell=False, preexec_fn=os.setsid)
+
+        def helpDocs_106_Event(self, event):
+                tempCommand = ['firefox', 'https://www.aps.anl.gov/Detectors/Sample-Environment#CryoStream']
+		p_ioc = subprocess.Popen(tempCommand, shell=False, preexec_fn=os.setsid)
+
+        def helpDocs_107_Event(self, event):
+                tempCommand = ['firefox', 'https://www.aps.anl.gov/Detectors/Area-Detectors#pixirad']
+		p_ioc = subprocess.Popen(tempCommand, shell=False, preexec_fn=os.setsid)
+
 
 	def helpDocs_301_Event(self, event):
 		tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Equipment_Information/Linkam_TS1500/']
@@ -202,6 +222,27 @@ class StartFrame(wx.Frame):
 	def Requests_Event(self, event):
 		tempCommand = ['firefox', 'https://beam.aps.anl.gov/pls/apsweb/wam0002.dds_main_menu']
 		p_ioc = subprocess.Popen(tempCommand, shell=False, preexec_fn=os.setsid)
+         
+        def VersionList_Event(self, event):
+                tempCommand = ['cd /local/DPbin/build_testing;./epics_module_version_list.py /local/DPbin/epics/epics_2020-03-17; cd /local/DPbin/epics/epics_2020-03-17; nedit module_version_list.txt']
+                #tempCommand = ['cd /local/DPbin/epics/epics_2020-03-17; less module_version_list.txt; cd /local/DPbin/build_testing;./epics_module_version_list.py; /local/DPbin/epics/epics_2020-03-17']
+                #tempCommand = ['cd /local/DPbin/Scripts; ./start_epics_version_list']
+		p_ioc = subprocess.Popen(tempCommand, shell=True, preexec_fn=os.setsid) 
+
+
+        #def VersionList_Event(self, event):
+                #tempCommand = ['cd /local/DPbin/epics/epics_2020-03-17;libreoffice module_version_list.txt']
+		#p_ioc = subprocess.Popen(tempCommand, shell=True, preexec_fn=os.setsid)
+                ##pgrDLG = wx.MessageDialog(self, " ", "Version_list_2020", wx.OK|wx.ICON_INFORMATION)
+                ##pgrDLG.ShowModal()
+                ##pgrDLG.Destroy()                             
+   
+        #def VersionList_Event(self, event):
+                #pgrDLG = wx.MessageDialog(self, "DET", "Version_list_2020", wx.OK|wx.ICON_INFORMATION)
+		#pgrDLG.ShowModal()
+		#pgrDLG.Destroy()
+                
+
 
 	# This Method launches the Detector Windows
 	def load_Event(self, event):
@@ -277,11 +318,11 @@ class StartFrame(wx.Frame):
 			self.DPWindows['coolsnap'].Show()
 			
 		elif(self.detectorBox.GetValue() == 'Mythen'):
-			import wxMythenStart
+			import wxMythen
 			try:
 				self.DPWindows['mythen']!=None
 			except:
-				self.DPWindows['mythen'] = wxMythenStart.MythenFrame(parent=self)
+				self.DPWindows['mythen'] = wxMythen.MythenFrame(parent=self)
 			self.DPWindows['mythen'].Center()
 			self.DPWindows['mythen'].Show()
 			
@@ -326,8 +367,51 @@ class StartFrame(wx.Frame):
 			except:
 				self.DPWindows['ikon'] = wxIkon.IkonFrame(parent=self)
 			self.DPWindows['ikon'].Center()
-			self.DPWindows['ikon'].Show()			
-		
+			self.DPWindows['ikon'].Show()	
+			
+### Canberra #######	
+	
+		elif(self.detectorBox.GetValue() == 'Canberra'):
+			import wxCanberra									# wx.CallAfter fixed
+			try:
+				self.DPWindows['Canberra'] !=None
+			except:
+				self.DPWindows['Canberra'] = wxCanberra.CanberraFrame(parent=self)
+			
+			self.DPWindows['Canberra'].Center()
+			self.DPWindows['Canberra'].Show()
+### PointGrey ######
+		elif(self.detectorBox.GetValue() == 'PointGrey'):
+			import wxPointGrey
+			try:
+				self.DPWindows['pointGrey']!=None
+			except:
+				self.DPWindows['pointGrey'] = wxPointGrey.PointGreyFrame(parent=self)
+				
+			self.DPWindows['pointGrey'].Center()
+			self.DPWindows['pointGrey'].Show()
+### Cryostat ######
+	        elif(self.detectorBox.GetValue() == 'Cryostat'):
+			import wxCryostat
+			try:
+				self.DPWindows['Cryostat']!=None
+			except:
+				self.DPWindows['Cryostat'] = wxCryostat.CryostatFrame(parent=self)
+				
+			self.DPWindows['Cryostat'].Center()
+			self.DPWindows['Cryostat'].Show()
+
+###Added Eiger 02/20/2020####
+                elif(self.detectorBox.GetValue() == 'Eiger'):
+                        import wxEiger
+                        try:
+                                self.DPWindows['eiger']!=None
+                        except:
+                                self.DPWindows['eiger'] = wxEiger.EigerFrame(parent=self)
+                        self.DPWindows['eiger'].Center()
+                        self.DPWindows['eiger'].Show()
+####################	
+			
 		else: print "Detector not supported yet..."
 
 	# This method Prompts the User for confimation when closing the Window

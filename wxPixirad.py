@@ -72,7 +72,8 @@ class PixiradFrame(wx.Frame):
 							},
 							'MEDM':{'pid': -999,
 								'running': False,
-								'search': 'medm -x -macro P='+ pv_Prefix +':, R=cam1: pixirad.adl',
+                                                                'search':'pixirad.adl',
+							       	#'search': 'medm -x -macro P='+ pv_Prefix +':, R=cam1: pixirad.adl',
 								'file': '/local/DPbin/Scripts/start_medm_pixirad',
 							},
 							'IMAGEJ':{'pid': -999,
@@ -220,8 +221,10 @@ class PixiradFrame(wx.Frame):
 		'''Change a button status'''
 		if switch == 'on':
 			#print 'setting button colour and label'
-			wx.CallAfter(self.Buttons[app]['Start Button'].SetBackgroundColour, wx.GREEN)
-			wx.CallAfter(self.Buttons[app]['Start Button'].SetLabel, "Running")
+			#wx.CallAfter(self.Buttons[app]['Start Button'].SetBackgroundColour, wx.GREEN)
+			#wx.CallAfter(self.Buttons[app]['Start Button'].SetLabel, "Running")
+                         wx.CallAfter(self.Buttons[app]['Start Button'].SetLabel, "Running")
+                         wx.CallAfter(self.Buttons[app]['Start Button'].SetBackgroundColour, wx.GREEN)
 
 		elif switch == 'off':
 			if app in self.processes:

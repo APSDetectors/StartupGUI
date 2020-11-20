@@ -1,17 +1,17 @@
-#!wxVortex.py
+#!wxCanberra.py
 
-#  wxVortex.py
+#  wxCanberra.py
 #  
 #  This is a wxPython GUI designed to launch EPICS IOC and MEDM
 #  scripts on RHEL LDAP Detector Pool machines.  
 #
 #  Authors: Russell Woods, Matthew Moore
-#     Date: 5/20/2013
-#	    8/8/2013
-#	    04/23/2014 - Simplified, added fixes for wxCallAfter
-#	    12/09/2014 - changed MEDM startup 
-#	    04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
-#	    06/04/2019 - updated stop_Event and pscheck to work with caQtDM from APSshare
+#	  Date: 5/20/2013
+#		8/8/2013
+#		04/23/2014 - Simplified, added fixes for wxCallAfter
+#		12/09/2014 - changed MEDM startup 
+#		04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
+#	    	06/04/2019 - updated stop_Event and pscheck to work with caQtDM from APSshare
 
 import wx
 import commands
@@ -25,7 +25,7 @@ import sys
 sys.path.append("/local/config/")
 import xrd_config as xrd_config
 
-pv_Prefix = xrd_config.DP_PV_SECTOR + 'vortex'+ xrd_config.DP_PV_SUFFIX
+pv_Prefix = xrd_config.DP_PV_SECTOR + 'Canberra'+ xrd_config.DP_PV_SUFFIX
 
 # Declare constants in capitals and as global variables at the start of your code
 # This makes it much easier to change them later, especially if they are used often.
@@ -34,12 +34,12 @@ pv_Prefix = xrd_config.DP_PV_SECTOR + 'vortex'+ xrd_config.DP_PV_SUFFIX
 WINDOW_WIDTH = 200
 WINDOW_HEIGHT = 1000
 
-class VortexFrame(wx.Frame):
-	"""Vortex Window"""
+class CanberraFrame(wx.Frame):
+	"""Canberra Window"""
 
 	# Define Self Method
 	def __init__(self, position=(400,500), parent=None, ClosePrompt=False):
-		wx.Frame.__init__(self, parent, title = 'DP Vortex Startup', pos = position, size = (WINDOW_WIDTH, WINDOW_HEIGHT), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
+		wx.Frame.__init__(self, parent, title = 'DP Canberra Startup', pos = position, size = (WINDOW_WIDTH, WINDOW_HEIGHT), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
 		
 		#Set PS checking wait time
 		self.checkCycle=1
@@ -52,7 +52,7 @@ class VortexFrame(wx.Frame):
 		# Make a Menu Bar
 		self.menubar = wx.MenuBar()
 		self.helpDocs = wx.Menu()								# Make a Menu
-		self.helpDocs.Append(101, '&Vortex', '')				# Add entry
+		self.helpDocs.Append(101, '&Canberra', '')				# Add entry
 		wx.EVT_MENU(self, 101, self.helpDocs_101_Event)			# Bind to Event
 		self.menubar.Append(self.helpDocs, '&Help Documents')	# Append to Menu Bar
 		self.SetMenuBar(self.menubar)							# Set Menu Bar
@@ -61,16 +61,16 @@ class VortexFrame(wx.Frame):
 		#--------------------------------------------------------------------------------------
 		# Vortex
 		#--------------------------------------------------------------------------------------
-		self.title = wx.StaticText(self.background, label="Vortex")
+		self.title = wx.StaticText(self.background, label="Canberra Negative High Voltage")
 		self.title.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.BOLD))
 		
 		
 		# PreAmp Frequency:
 		self.saturn_title = wx.StaticText(self.background, -1, 'SATURN BOX')
 		self.saturn_title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-		self.saturn_entry = wx.ComboBox(self.background, choices=["20MHz", "40MHz"], size=[90,25])
+		self.saturn_entry = wx.ComboBox(self.background, choices=["20MHz_negative", "40MHz_negative"], size=[150,25])
 		self.saturn_entry.SetEditable(False)
-		self.saturn_entry.SetValue("20MHz")
+		self.saturn_entry.SetValue("20MHz_negative")
 		
 		
 		# This Dictionary holds required information for each Process controlled by the GUI
@@ -83,13 +83,13 @@ class VortexFrame(wx.Frame):
 					'MEDM':{	'pid': -999,
 								'running': False,
 								'search': 'medm -x -macro P='+pv_Prefix+':, D=dxp1:, M=mca1 dxpSaturn.adl',
-								'file': ['/local/DPbin/Scripts/start_medm_vortex', pv_Prefix],
+								'file': ['/local/DPbin/Scripts/start_medm_Canberra', pv_Prefix],
 								},	
 					'IDL MCA':{	'pid': -999,
 								'running': False,
 								'search': "vm=/local/DPbin/MCA/mca.sav",
 								'file': '/local/DPbin/Scripts/start_idl_mca',
-					},	
+								},	
 					'SAVE-RESTORE MENU':
 							{	'pid': -999,
 								'running': False,
@@ -97,9 +97,9 @@ class VortexFrame(wx.Frame):
 								'file': ['/local/DPbin/Scripts/start_medm_configMenu',pv_Prefix,]
 							},	
 					'caQtDM':
-					                {	'pid': -999,
+					    {	'pid': -999,
 								'running': False,
-								'search': 'caQtDM -macro P='+ pv_Prefix + ':',
+								'search': 'caQtDM -macro P='+ pv_Prefix + ':,D=dxp1:,M=mca1 dxpSaturn.ui',
 								'file': ['/local/DPbin/Scripts/start_caQtDM_vortex',pv_Prefix,]
 							},
 					
@@ -176,7 +176,7 @@ class VortexFrame(wx.Frame):
 	#         NOTE: Executed scripts MUST have a shebang! definition in line #1
 	#--------------------------------------------------------------------------------------	
 	def helpDocs_101_Event(self, event):
-		tempCommand = ['firefox', 'http://www.aps.anl.gov/Xray_Science_Division/Detectors/Detector_Pool/Detector_Information/Vortex_SDD_SII_Nano']
+		tempCommand = ['firefox', 'https://www1.aps.anl.gov/Detectors/Spectroscopic-Detectors#Ge']
 		p_ioc = subprocess.Popen(tempCommand, shell=False, preexec_fn=os.setsid)
 		
 		
@@ -244,7 +244,7 @@ class VortexFrame(wx.Frame):
 			
 			if app=='IOC':
 				SaturnBoxChoice = self.saturn_entry.GetValue()
-				tempFile = [self.processes['IOC']['file'], 'vortex' + '-' + str(SaturnBoxChoice)]
+				tempFile = [self.processes['IOC']['file'], 'Canberra' + '-' + str(SaturnBoxChoice)]
 				subprocess.Popen(tempFile, preexec_fn=os.setsid)
 					
 			else:
@@ -279,3 +279,5 @@ class VortexFrame(wx.Frame):
 		else:
 			print "No process to stop."
 
+	
+	

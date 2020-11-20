@@ -1,3 +1,5 @@
+#!/APSshare/anaconda/x86_64/bin/python
+
 # file : wxIkon.py
 
 #!/APSshare/epd/rh6-x86/bin/python2.7
@@ -10,11 +12,12 @@
 #  Authors: Russell Woods, Matthew Moore
 #     Date: 11/25/2013
 #           12/18/2013
-#	          04/07/2014
-#	          05/14/2014 
-#	          06/02/2014 (copied from wxPilatus_v2.py)	
-#	          04/29/2015 (Added Quick Start Guide)
-#	          11/11/2015 (Copied from wxNeo.py)
+#	    04/07/2014
+#	    05/14/2014 
+#	    06/02/2014 (copied from wxPilatus_v2.py)	
+#	    04/29/2015 (Added Quick Start Guide)
+#	    11/11/2015 (Copied from wxNeo.py)
+#	    06/04/2019 - updated stop_Event and pscheck to work with caQtDM from APSshare
 
 import wx
 import commands
@@ -196,7 +199,16 @@ class IkonFrame(wx.Frame):
 		'''Stop an App'''
 		if(self.processes[app]['running']):
 			print 'Stopping '+str(app)+'...'
-			os.kill(self.processes[app]['pid'], signal.SIGKILL)
+
+			# pgrep for all associated PIDs and make into a list
+			pids = (subprocess.check_output([ 'pgrep', '-f', self.processes[app]['search'] ])).split('\n')
+			pids = filter(None, pids)
+
+			# Loop over all PIDs
+			for i in pids:
+				print ' stopping pid: ' + str(i)
+				os.kill(int(i), signal.SIGKILL)
+
 			self.button_status(app, 'off')
 		else:
 			print "No process to stop."
@@ -206,7 +218,6 @@ class IkonFrame(wx.Frame):
 		'''Track the current state of processes - Runs in a separate thread'''
 		while(self.progRunning):
 			for item in self.processes:
-				#print 'pscheck is running: ' + str(item)
 				try:
 					tempResult = subprocess.check_output([ 'pgrep', '-f', self.processes[item]['search'] ])
 					self.processes[item]['pid'] = int(tempResult.split('\n')[0])

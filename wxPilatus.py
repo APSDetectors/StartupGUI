@@ -10,12 +10,13 @@
 #  Authors: Russell Woods, Matthew Moore
 #     Date: 11/25/2013
 #           12/18/2013
-#	        04/07/2014
-#	        05/14/2014
-#			12/10/2014 - updating pv_config construction
-#			01/20/2015 - Added save-restore menu
-#			04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
-#     09/03/2015 - Added caQtDM
+#	    04/07/2014
+#	    05/14/2014
+#	    12/10/2014 - updating pv_config construction
+#	    01/20/2015 - Added save-restore menu
+#	    04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
+#           09/03/2015 - Added caQtDM
+#	    06/04/2019 - updated stop_Event and pscheck to work with caQtDM from APSshare
 
 import wx
 import commands
@@ -105,12 +106,12 @@ class PilatusFrame(wx.Frame):
 		
 		# Start and Stop Buttons:
 		self.ButtonOrder = ['CAMSERVER',
-							'IOC',
-							'MEDM',
-							'IMAGEJ',
-							'SAVE-RESTORE MENU',
-							'caQtDM',
-							]
+				'IOC',
+				'MEDM',
+				'IMAGEJ',
+				'SAVE-RESTORE MENU',
+				'caQtDM',
+				]
 	
 		self.Buttons = dict.fromkeys(self.ButtonOrder)
 
@@ -196,11 +197,19 @@ class PilatusFrame(wx.Frame):
 		'''Stop an App'''
 		if(self.processes[app]['running']):
 			print 'Stopping '+str(app)+'...'
-			os.kill(self.processes[app]['pid'], signal.SIGKILL)
+
+			# pgrep for all associated PIDs and make into a list
+			pids = (subprocess.check_output([ 'pgrep', '-f', self.processes[app]['search'] ])).split('\n')
+			pids = filter(None, pids)
+
+			# Loop over all PIDs
+			for i in pids:
+				print ' stopping pid: ' + str(i)
+				os.kill(int(i), signal.SIGKILL)
+
 			self.button_status(app, 'off')
 		else:
 			print "No process to stop."
-
 
 	def pscheck(self):
 		'''Track the current state of processes - Runs in a separate thread'''

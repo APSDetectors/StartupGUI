@@ -8,9 +8,10 @@
 #  Authors: Russell Woods, Matthew Moore
 #     Date: 5/20/2013
 #           8/8/2013
-#	        9/16/2014
-#			12/09/2014 - changed how MEDM & ImageJ start
-#			04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
+#	    9/16/2014
+#           12/09/2014 - changed how MEDM & ImageJ start
+#           04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
+#	    06/04/2019 - updated stop_Event and pscheck to work better with caQtDM
 
 import wx
 import commands
@@ -96,23 +97,22 @@ class Mar345Frame(wx.Frame):
 								'file': ['/local/DPbin/Scripts/start_medm_configMenu',pv_Prefix,]
 							},
 					'caQtDM':
-					    {	'pid': -999,
+					                {	'pid': -999,
 								'running': False,
-								'search': 'caQtDM -macro P='+ pv_Prefix + ':, R=cam1: mar345.ui',
+								'search': 'caQtDM -macro P='+ pv_Prefix,
 								'file': ['/local/DPbin/Scripts/start_caQtDM_mar345',pv_Prefix,]
 							},
-					
 					}
 
 		# Start and Stop Buttons:
 		self.ButtonOrder = [
-							'MarDTB',
-							'IOC',
-							'MEDM',
-							'ImageJ',
-							'SAVE-RESTORE MENU',
-							'caQtDM',
-							]
+					'MarDTB',
+					'IOC',
+					'MEDM',
+					'ImageJ',
+					'SAVE-RESTORE MENU',
+					'caQtDM',
+					]
 						
 		self.Buttons = dict.fromkeys(self.ButtonOrder)
 		
@@ -188,21 +188,16 @@ class Mar345Frame(wx.Frame):
 		'''Track the current state of processes - Runs in a separate thread'''
 		global DetectorThreadRunning
 		while(self.progRunning):
-			#print self.checkbox1.GetValue()
 			for item in self.processes:
-				#print 'item =' + str(item)
-				#print 'pscheck is running...'
 				try:
-					tempResult = subprocess.check_output([ 'pgrep', '-f', self.processes[item]['search'] ])
+					tempResult = (subprocess.check_output([ 'pgrep', '-f', self.processes[item]['search'] ])).split('\n')[0]
 					self.processes[item]['pid'] = int(tempResult)
 					if not(self.processes[item]['running']):
 						self.button_status(item, 'on')
 						self.processes[item]['running'] = True
 				except:
 					if(self.processes[item]['running']):
-						#print 'program ended, calling button_status...'
 						self.button_status(item, 'off')
-						#print '...button_status update finished
 			
 			time.sleep(self.checkCycle)
 
@@ -277,22 +272,17 @@ class Mar345Frame(wx.Frame):
 		'''Stop an App'''
 		if(self.processes[app]['running']):
 			print 'Stopping '+str(app)+'...'
-			os.kill(self.processes[app]['pid'], signal.SIGKILL)
+
+			# pgrep for all associated PIDs and make into a list
+			pids = (subprocess.check_output([ 'pgrep', '-f', self.processes[app]['search'] ])).split('\n')
+			pids = filter(None, pids)
+
+			# Loop over all PIDs
+			for i in pids:
+				print ' stopping pid: ' + str(i)
+				os.kill(int(i), signal.SIGKILL)
+
 			self.button_status(app, 'off')
 		else:
 			print "No process to stop."
 	
-	
-#---------------------------------------------------------------------------------
-#  Main loop
-#---------------------------------------------------------------------------------
-
-# Make an application
-#app_2 = wx.App(redirect=False)
-
-# Make an instance of the class - the Topmost GUI element
-#startTest = StartFrame()
-#russTest = Mar345Frame()
-
-# Let it run!
-#app_2.MainLoop()

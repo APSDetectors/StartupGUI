@@ -1,6 +1,6 @@
-#!wxProcilica.py
+#!wxPointGrey.py
 
-#  wxProsilica
+#  wxPointGrey
 #  
 #  This is a wxPython GUI designed to launch EPICS IOC and MEDM
 #  scripts on the new RHEL LDAP Detector Pool machines.  
@@ -13,9 +13,9 @@
 #           07/17/2014
 #           09/09/2014
 #           12/09/2014 - Updated pv_Prefix construction
-#           03/25/2015 - Added save restore menu & updated to newer way of button updateds
+#	    03/25/2015 - Added save restore menu & updated to newer way of button updateds
 #	    04/29/2015 - Added Quick Start Guide, removed old wxSaveRestore code
-#	    06/04/2019 - updated stop_Event and pscheck to work with caQtDM from APSshare
+#	    06/04/2019 - updated stop_Event and pscheck to work with caQtDM with APSshare
 
 import wx
 import commands
@@ -30,13 +30,13 @@ import xrd_config
 
 WINDOW_WIDTH = 200
 WINDOW_HEIGHT = 1000
-DETECTOR = 'Prosilica'
+DETECTOR = 'PointGrey'
 
 #pv_Prefix = 'prosilica'
-pv_Prefix = xrd_config.DP_PV_SECTOR + 'prosilica' + xrd_config.DP_PV_SUFFIX
+pv_Prefix = xrd_config.DP_PV_SECTOR + 'pointGrey' + xrd_config.DP_PV_SUFFIX
 
-class ProsilicaFrame(wx.Frame):
-	'''Prosilica Window'''
+class PointGreyFrame(wx.Frame):
+	'''PointGrey Window'''
 	
 	# Globals
 	pid_ioc = -999
@@ -45,10 +45,10 @@ class ProsilicaFrame(wx.Frame):
 
 	# Define Self Method
 	def __init__(self, position=(400,500), parent=None, ClosePrompt=False):
-		wx.Frame.__init__(self, parent, title = 'DP Prosilica Startup', pos = position, size = (WINDOW_WIDTH, WINDOW_HEIGHT), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
+		wx.Frame.__init__(self, parent, title = 'Detector Pool PointGrey Startup', pos = position, size = (WINDOW_WIDTH, WINDOW_HEIGHT), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
 		
 		#Set PS checking wait time
-		self.checkCycle=0.1
+		self.checkCycle=1
 		
 		# Make the panel
 		self.background = wx.Panel(self, -1, style=wx.SUNKEN_BORDER)
@@ -58,42 +58,42 @@ class ProsilicaFrame(wx.Frame):
 		# Make a Menu Bar
 		self.menubar = wx.MenuBar()
 		self.helpDocs = wx.Menu()								# Make a Menu
-		self.helpDocs.Append(101, '&Prosilica', '')				# Add entry
+		self.helpDocs.Append(101, '&PointGrey', '')				# Add entry
 		wx.EVT_MENU(self, 101, self.helpDocs_101_Event)			# Bind to Event
 		self.menubar.Append(self.helpDocs, '&Help Documents')	# Append to Menu Bar
 		self.SetMenuBar(self.menubar)							# Set Menu Bar
 		
 		
 		#--------------------------------------------------------------------------------------
-		# Prosilica
+		# Pointgrey
 		#--------------------------------------------------------------------------------------
-		self.title = wx.StaticText(self.background, label="Prosilica CCD")
+		self.title = wx.StaticText(self.background, label="PointGrey CCD")
 		self.title.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.BOLD))
 		
 		# Model Name
-		self.ModelBox_title = wx.StaticText(self.background, -1, 'DP Prosilica \t\nModel Number:\t')
-		self.ModelBox_title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-		self.ModelBox = wx.ComboBox(self.background, choices=["GC1380H", "GC2450", "XrayEye", "1BM_manta" ], size=[90,25])
-		self.ModelBox.SetEditable(False)
+		#self.ModelBox_title = wx.StaticText(self.background, -1, 'DP Prosilica \t\nModel Number:\t')
+		#self.ModelBox_title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+		#self.ModelBox = wx.ComboBox(self.background, choices=["GC1380H", "GC2450", "XrayEye", "1BM_manta" ], size=[90,25])
+		#self.ModelBox.SetEditable(False)
 		
 		# Bit Depth
-		self.BitDepthBox_title = wx.StaticText(self.background, -1, 'Bit Depth:\t')
-		self.BitDepthBox_title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-		self.BitDepthBox = wx.ComboBox(self.background, choices=["8", "16"], size=[80,25])
-		self.BitDepthBox.SetEditable(False)
+		#self.BitDepthBox_title = wx.StaticText(self.background, -1, 'Bit Depth:\t')
+		#self.BitDepthBox_title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+		#self.BitDepthBox = wx.ComboBox(self.background, choices=["8", "16"], size=[80,25])
+		#self.BitDepthBox.SetEditable(False)
 
 		# Launch and Stop Buttons:
 		# This Dictionary holds required information for each Process controlled by the GUI
 		self.processes={
 					'IOC':{		'pid': -999,
 								'running': False,
-								'search': 'prosilicaApp',
+								'search': 'pointGreyApp',
 								'file': '/local/DPbin/Scripts/start_ioc',
 							  },
 					'MEDM':{	'pid': -999,
 								'running': False,
-								'search': 'medm -x -macro P='+pv_Prefix +':, R=cam1: prosilica.adl',
-								'file': ['/local/DPbin/Scripts/start_medm_prosilica', pv_Prefix],
+								'search': 'medm -x -macro P='+pv_Prefix +':, R=cam1: pointGrey.adl',
+								'file': ['/local/DPbin/Scripts/start_medm_pointGrey', pv_Prefix],
 								},	
 					'IMAGEJ':{	'pid': -999,
 								'running': False,
@@ -109,20 +109,20 @@ class ProsilicaFrame(wx.Frame):
 					'caQtDM':
 					    {	'pid': -999,
 								'running': False,
-								'search': 'caQtDM -macro P='+ pv_Prefix + ':, R=cam1: prosilica.ui',
-								'file': ['/local/DPbin/Scripts/start_caQtDM_prosilica',pv_Prefix,]
+								'search': 'caQtDM -macro P='+pv_Prefix +':, R=cam1: pointGrey.ui',
+								'file': ['/local/DPbin/Scripts/start_caQtDM_pointGrey',pv_Prefix,]
 							},
 					}
 
 
 		# Start and Stop Buttons:
 		self.ButtonOrder = [
-							"IOC",
-							"MEDM",
-							'IMAGEJ',
-							'SAVE-RESTORE MENU',
-							'caQtDM',
-							]
+					"IOC",
+					"MEDM",
+					'IMAGEJ',
+					'SAVE-RESTORE MENU',
+					'caQtDM',
+					]
 						
 		self.Buttons = dict.fromkeys(self.ButtonOrder)
 		
@@ -151,13 +151,13 @@ class ProsilicaFrame(wx.Frame):
 		# Make Horizontal Box Sizers
 		self.horizontalBoxes = []
 		
-		self.horizontalBoxes.append(wx.BoxSizer(wx.HORIZONTAL))
-		self.horizontalBoxes[-1].Add(self.ModelBox_title, proportion = 1, border = 0,flag=wx.ALIGN_CENTER)
-		self.horizontalBoxes[-1].Add(self.ModelBox, proportion = 0, border = 0,flag=wx.ALIGN_CENTER)
+		#self.horizontalBoxes.append(wx.BoxSizer(wx.HORIZONTAL))
+		#self.horizontalBoxes[-1].Add(self.ModelBox_title, proportion = 1, border = 0,flag=wx.ALIGN_CENTER)
+		#self.horizontalBoxes[-1].Add(self.ModelBox, proportion = 0, border = 0,flag=wx.ALIGN_CENTER)
 		
-		self.horizontalBoxes.append(wx.BoxSizer(wx.HORIZONTAL))
-		self.horizontalBoxes[-1].Add(self.BitDepthBox_title, proportion = 1, border = 0,flag=wx.ALIGN_CENTER)
-		self.horizontalBoxes[-1].Add(self.BitDepthBox, proportion = 0, border = 0,flag=wx.ALIGN_CENTER)
+		#self.horizontalBoxes.append(wx.BoxSizer(wx.HORIZONTAL))
+		#self.horizontalBoxes[-1].Add(self.BitDepthBox_title, proportion = 1, border = 0,flag=wx.ALIGN_CENTER)
+		#self.horizontalBoxes[-1].Add(self.BitDepthBox, proportion = 0, border = 0,flag=wx.ALIGN_CENTER)
 		
 		
 		for Rows in self.ButtonOrder:
@@ -204,20 +204,22 @@ class ProsilicaFrame(wx.Frame):
 			print 'Starting ' + str(app) + '...'
 			# Start the subprocess
 			if app == 'IOC':
-				CCD = self.ModelBox.GetValue()
-				BitDepth = self.BitDepthBox.GetValue()
-				if len(CCD)>0 and len(BitDepth)>0:	
+				CCD = 'PointGrey'
+				#CCD = self.ModelBox.GetValue()
+				#BitDepth = self.BitDepthBox.GetValue()
+				#if len(CCD)>0 and len(BitDepth)>0:	
 				# Start the IOC
 			
-					# Start the subprocess
-					tempFile = [self.processes['IOC']['file'], str(CCD) + "-" + str(BitDepth)]
-					self.IOCsubprocess = subprocess.Popen(tempFile, preexec_fn=os.setsid)
+				# Start the subprocess
+				#tempFile = [self.processes['IOC']['file'], str(CCD) + "-" + str(BitDepth)]
+				tempFile = [self.processes['IOC']['file'], str(CCD)]
+				self.IOCsubprocess = subprocess.Popen(tempFile, preexec_fn=os.setsid)
 
-					# Grab the subprocess I.D.
-					self.processes['IOC']['pid'] = DPOStools.waitforprocess(self.processes['IOC']['search'])
-					self.processes['IOC']['running'] = True
-					self.button_status(app, 'on')
-					print 'process id ' + str(app) + ' = ' + str(self.processes[app]['pid'])
+				# Grab the subprocess I.D.
+				self.processes['IOC']['pid'] = DPOStools.waitforprocess(self.processes['IOC']['search'])
+				self.processes['IOC']['running'] = True
+				self.button_status(app, 'on')
+				print 'process id ' + str(app) + ' = ' + str(self.processes[app]['pid'])
 			else:
 			
 				subprocess.Popen(self.processes[app]['file'], preexec_fn=os.setsid)
@@ -248,8 +250,6 @@ class ProsilicaFrame(wx.Frame):
 			self.button_status(app, 'off')
 		else:
 			print "No process to stop."
-
-
 
 	def pscheck(self):
 		'''Track the current state of processes - Runs in a separate thread'''
