@@ -9,9 +9,10 @@
 
 
 import wx
+import wx.adv
 import os
 
-class DPSplashScreen(wx.SplashScreen):
+class DPSplashScreen(wx.adv.SplashScreen):
     """
 	Create a splash screen widget.
     """
@@ -20,11 +21,11 @@ class DPSplashScreen(wx.SplashScreen):
         # This is a recipe to a the screen.
         
         splashBitmap = wx.Image(name = (os.path.dirname(__file__)+"/DP-EPICS-Startup-Screen.jpg")).ConvertToBitmap()
-        splashStyle = wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT
+        splashStyle = wx.adv.SPLASH_CENTRE_ON_SCREEN | wx.adv.SPLASH_TIMEOUT
         splashDuration = 2000  # milliseconds
 
         # Call the constructor with the above arguments in exactly the following order.
-        wx.SplashScreen.__init__(self, splashBitmap, splashStyle, splashDuration, parent)
+        wx.adv.SplashScreen.__init__(self, splashBitmap, splashStyle, splashDuration, parent)
         wx.Yield()
         
         

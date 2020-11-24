@@ -58,7 +58,7 @@ class IkonFrame(wx.Frame):
 		self.menubar = wx.MenuBar()
 		self.helpDocs = wx.Menu()					                      # Make a Menu
 		self.helpDocs.Append(101, '&Ikon', '')				          # Add entry
-		wx.EVT_MENU(self, 101, self.helpDocs_101_Event)			    # Bind to Event
+		self.Bind(wx.EVT_MENU, self.helpDocs_101_Event, id=101)			    # Bind to Event
 		self.menubar.Append(self.helpDocs, '&Help Documents')		# Append to Menu Bar
 		self.SetMenuBar(self.menubar)					                  # Set Menu Bar
 
